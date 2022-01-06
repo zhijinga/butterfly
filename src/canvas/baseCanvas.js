@@ -4,28 +4,28 @@ const $ = require('jquery');
 const _ = require('lodash');
 const domtoimage = require('dom-to-image');
 
+import Edge from '../edge/baseEdge';
+import Endpoint from '../endpoint/baseEndpoint';
+import Group from '../group/baseGroup';
 import Canvas from "../interface/canvas";
 import Node from '../node/baseNode';
-import Edge from '../edge/baseEdge';
-import Group from '../group/baseGroup';
-import Endpoint from '../endpoint/baseEndpoint';
-import Layout from '../utils/layout/layout';
-import SelectCanvas from '../utils/selectCanvas';
 // 画布和屏幕坐标地换算
 import CoordinateService from '../utils/coordinate';
-// scope的比较
-import ScopeCompare from '../utils/scopeCompare';
 // 网格模式
 import GridService from '../utils/gridService';
 // 辅助线模式
 import GuidelineService from '../utils/guidelineService';
-// 小地图模式
-import Minimap from '../utils/minimap';
+import Layout from '../utils/layout/layout';
 // 线段动画
 import LinkAnimateUtil from '../utils/link/link_animate';
-
-
+// 小地图模式
+import Minimap from '../utils/minimap';
+// scope的比较
+import ScopeCompare from '../utils/scopeCompare';
+import SelectCanvas from '../utils/selectCanvas';
 import './baseCanvas.less';
+
+
 
 class BaseCanvas extends Canvas {
   constructor(options) {
@@ -91,7 +91,7 @@ class BaseCanvas extends Canvas {
       limitQueueLen: 5, // 默认操作队列只有5步
       isCloneDeep: _.get(options, 'global.isCloneDeep', true), // addNode,addEdge,addGroup传入的数据是否深拷贝一份
     });
-    
+
     // 放大缩小和平移的数值
     this._zoomData = 1;
     this._moveData = [0, 0];
@@ -145,7 +145,7 @@ class BaseCanvas extends Canvas {
     this._rootWidth = $(this.root).width();
     this._rootHeight = $(this.root).height();
     $(this.root).css('overflow', 'hidden');
-    if($(this.root).css('position') === 'static') {
+    if ($(this.root).css('position') === 'static') {
       $(this.root).css('position', 'relative');
     }
 
@@ -171,7 +171,7 @@ class BaseCanvas extends Canvas {
     this._guideObjQueue = [];
     this._guideObj = undefined;
     this._guideTimer = undefined;
-    
+
 
     // 坐标转换服务
     this._coordinateService = new CoordinateService({
@@ -260,7 +260,7 @@ class BaseCanvas extends Canvas {
         }, 20);
       });
     });
-    
+
     drawPromise.then(() => {
       this.actionQueue = [];
       this.actionQueueIndex = -1;
@@ -272,7 +272,7 @@ class BaseCanvas extends Canvas {
       this._hasInited = true;
     });
   }
-  redraw (opts, callback) {
+  redraw(opts, callback) {
     this.removeNodes(this.nodes.map((item) => item.id) || []);
     this.removeGroups(this.groups.map((item) => item.id) || []);
     this.clearActionQueue();
@@ -290,7 +290,7 @@ class BaseCanvas extends Canvas {
       type,
       options
     });
-    let {nodes, groups, edges} = this;
+    let { nodes, groups, edges } = this;
     let newNodes = nodes.map(item => item.options);
     let newGroups = groups.map(item => item.options);
     let newEdges = edges.map((item) => {
@@ -315,23 +315,23 @@ class BaseCanvas extends Canvas {
   _genSvgWrapper() {
     function _detectMob() {
       const toMatch = [
-          /Android/i,
-          /webOS/i,
-          /iPhone/i,
-          /iPad/i,
-          /iPod/i,
-          /BlackBerry/i,
-          /Windows Phone/i,
-          /Electron/i
+        /Android/i,
+        /webOS/i,
+        /iPhone/i,
+        /iPad/i,
+        /iPod/i,
+        /BlackBerry/i,
+        /Windows Phone/i,
+        /Electron/i
       ];
       return toMatch.some((toMatchItem) => {
-          return window.navigator.userAgent.match(toMatchItem);
+        return window.navigator.userAgent.match(toMatchItem);
       });
     }
     let _isMobi = _detectMob();
     let _SVGWidth = '100%';
     let _SVGHeight = '100%';
-    
+
     let _detectZoom = () => {
       let ratio = 0;
       let screen = window.screen;
@@ -372,7 +372,7 @@ class BaseCanvas extends Canvas {
       .css('z-index', this._dragEdgeZindex)
       .appendTo(this.wrapper);
 
-    if(!_isMobi) {
+    if (!_isMobi) {
       // hack 监听浏览器的缩放比例并适配
       window.onresize = () => {
         let _scale = 1 / (_detectZoom() / 200);
@@ -429,8 +429,8 @@ class BaseCanvas extends Canvas {
           terWidth: $(this.root).width(),
           terHeight: $(this.root).height()
         });
-        this.canvasWrapper.resize({root: this.root});
-        this.setGridMode(true, undefined , true);
+        this.canvasWrapper.resize({ root: this.root });
+        this.setGridMode(true, undefined, true);
       });
       _resizeObserver.observe(this.root);
     } else {
@@ -444,7 +444,7 @@ class BaseCanvas extends Canvas {
           terWidth: $(this.root).width(),
           terHeight: $(this.root).height()
         });
-        this.canvasWrapper.resize({root: this.root});
+        this.canvasWrapper.resize({ root: this.root });
         this.setGridMode(true, undefined, true);
       })
     }
@@ -457,7 +457,7 @@ class BaseCanvas extends Canvas {
         let _point = data.data;
         let rmEdges = this.edges.filter((item) => {
           return (item.sourceNode.id === _point.nodeId && item.sourceEndpoint.id === _point.id) ||
-                 (item.targetNode.id === _point.nodeId && item.targetEndpoint.id === _point.id);
+            (item.targetNode.id === _point.nodeId && item.targetEndpoint.id === _point.id);
         });
         this.removeEdges(rmEdges);
       } else if (data.type === 'group:addEndpoint') {
@@ -713,7 +713,7 @@ class BaseCanvas extends Canvas {
         x: event.clientX,
         y: event.clientY
       };
-      
+
       // 拖动的时候提高z-index
       if (this._dragNode && this._dragNode.__type == 'node') {
         $(this._dragNode.dom).css('z-index', (++this._dragNodeZIndex) * 2 - 1);
@@ -727,7 +727,7 @@ class BaseCanvas extends Canvas {
           $(point.dom).css('z-index', this._dragGroupZIndex * 2);
         });
       }
-      
+
       this.emit('system.drag.start', {
         dragType: this._dragType,
         dragNode: this._dragNode,
@@ -882,7 +882,7 @@ class BaseCanvas extends Canvas {
                 unionKeys.forEach((key) => {
                   endpoints = endpoints.concat(this._unionData[key].endpoints);
                 });
-                endpoints = _.uniqBy(endpoints, (_point) => {return _point.nodeId + '||' + _point.id});
+                endpoints = _.uniqBy(endpoints, (_point) => { return _point.nodeId + '||' + _point.id });
               } else {
                 endpoints = [this._dragEndpoint];
               }
@@ -1237,7 +1237,7 @@ class BaseCanvas extends Canvas {
 
             return edge;
           });
-          
+
           if (_delEdges.length !== 0 && _emitEdges.length !== 0) {
             this.pushActionQueue({
               type: 'system:reconnectEdges',
@@ -1292,7 +1292,7 @@ class BaseCanvas extends Canvas {
       }
 
       if ((this._dragType === 'node:drag' || this._dragType === 'group:drag') && this._dragNode) {
-        
+
         let _dragType = this._dragType === 'node:drag' ? 'node' : 'group';
         let _dragItem = this._dragNode;
 
@@ -1785,10 +1785,10 @@ class BaseCanvas extends Canvas {
    * @param {Function} options.iteratee
    * @returns {Object} filteredGraph
    */
-  getNeighborNodesAndEdgesByLevel({node, endpoint, type = 'out', level = Infinity, iteratee = () => true}) {
+  getNeighborNodesAndEdgesByLevel({ node, endpoint, type = 'out', level = Infinity, iteratee = () => true }) {
     // 先求source-target level 层
-    if (!node || !this.nodes.length) return {nodes: [], edges: []};
-    if (level == 0 || !this.edges.length) return {nodes: [node], edges: []};
+    if (!node || !this.nodes.length) return { nodes: [], edges: [] };
+    if (level == 0 || !this.edges.length) return { nodes: [node], edges: [] };
     let quene = [];
     let neighbors = [];
     const visited = new Set();
@@ -1805,7 +1805,7 @@ class BaseCanvas extends Canvas {
 
     visited.add(node.id);
 
-    if (!quene.length) return {nodes: [node], edges: []};
+    if (!quene.length) return { nodes: [node], edges: [] };
     // 2. BFS,得到 nodes 集合
     while (quene.length) {
       const [$node, $endpoint, $level] = quene.shift();
@@ -1830,7 +1830,7 @@ class BaseCanvas extends Canvas {
     // 4. 获取 edges，1. 只考虑点集 2. 考虑边
     // 目前只考虑点集内的全部边
     this.edges.forEach(edge => {
-      const {sourceNode, sourceEndpoint, targetNode, targetEndpoint} = edge;
+      const { sourceNode, sourceEndpoint, targetNode, targetEndpoint } = edge;
       if (visited.has(sourceNode.id) && visited.has(targetNode.id)) {
         nodes.add(sourceNode);
         nodes.add(targetNode);
@@ -1848,7 +1848,7 @@ class BaseCanvas extends Canvas {
     // {[nodeId]: {[endpointId]: [[targetNode, targetEndpoint]]}}
     const adjTable = {};
     this.edges.forEach(edge => {
-      const {sourceNode, sourceEndpoint, targetNode, targetEndpoint} = edge;
+      const { sourceNode, sourceEndpoint, targetNode, targetEndpoint } = edge;
       const sourceNodeId = sourceNode.id;
       const sourceEndpointId = sourceEndpoint.id;
       const targetNodeId = targetNode.id;
@@ -1879,7 +1879,7 @@ class BaseCanvas extends Canvas {
     return hasNodes.length > 0;
   }
   _moveNode(node, x, y, isNotEventEmit) {
-    
+
     let _isInGroup = !!node.group;
     if (_isInGroup) {
       let groupObj = this.getGroup(node.group);
@@ -1890,7 +1890,7 @@ class BaseCanvas extends Canvas {
         let _nodeW = $(node.dom).width();
         let _nodeH = $(node.dom).height();
         if (x < 0 || (x + _nodeW) > _groupW || y < 0 || (y + _nodeH) > _groupH) {
-          return ;
+          return;
         }
       }
     }
@@ -1965,7 +1965,7 @@ class BaseCanvas extends Canvas {
     });
     return _.flatten(points);
   }
-  
+
 
   //===============================
   //[ 节点组渲染 ]
@@ -1984,7 +1984,7 @@ class BaseCanvas extends Canvas {
     // 新建的group不需要重新适配位置
     let _isNotAdaptorPos = _.get(options, 'notAdaptorPos');
     let _groupObj = null;
-    
+
     if (group instanceof Group) {
       _groupObj = group;
     } else {
@@ -1998,7 +1998,7 @@ class BaseCanvas extends Canvas {
         })
       );
     }
-    
+
     if (this._isExistGroup(_groupObj)) {
       // 后续用新的group代码旧的group
       console.warn(`group:${_groupObj.id} has existed`);
@@ -2040,7 +2040,7 @@ class BaseCanvas extends Canvas {
       unionItems = unionItems.filter((item) => {
         return ScopeCompare(item.scope, _groupObj.scope, _.get(this, 'global.isScopeStrict')) && (item.group === _groupObj.id || item.group == undefined);
       });
-      
+
       // 重新计算group的位置
       if (!_isNotAdaptorPos) {
         let _groupLeft = Infinity;
@@ -2080,7 +2080,7 @@ class BaseCanvas extends Canvas {
             } else {
               const _NodeClass = item.Class || this._NodeClass;
               _nodeObj = new _NodeClass(
-                _.assign({}, this.global.isCloneDeep ? _.cloneDeep(item) : item , {
+                _.assign({}, this.global.isCloneDeep ? _.cloneDeep(item) : item, {
                   _global: this.global,
                   _on: this.on.bind(this),
                   _emit: this.emit.bind(this),
@@ -2337,7 +2337,7 @@ class BaseCanvas extends Canvas {
       [group.id]: 'group'
     };
     let queue = [group];
-    while(queue.length > 0) {
+    while (queue.length > 0) {
       let item = queue.pop();
       if (item.nodes.length > 0) {
         item.nodes.forEach((item) => {
@@ -2429,7 +2429,7 @@ class BaseCanvas extends Canvas {
     this._hoverGroupObj && $(this._hoverGroupObj.dom).removeClass('butterfly-group-hover');
     this._hoverGroupObj && $(this._hoverGroupObj.dom).removeClass('butterfly-group-hover-valid');
     this._hoverGroupObj && $(this._hoverGroupObj.dom).removeClass('butterfly-group-hover-invalid');
-    this._hoverGroupTimer = undefined; 
+    this._hoverGroupTimer = undefined;
     this._hoverGroupObj = undefined;
     this._hoverGroupQueue = [];
   }
@@ -2547,7 +2547,7 @@ class BaseCanvas extends Canvas {
           console.warn(`butterflies error: can not connect edge. link sourceNodeId:${link.sourceNode};link targetNodeId:${link.targetNode}`);
           return;
         }
-        
+
         let sourceEndpoint = null;
         let targetEndpoint = null;
 
@@ -2607,7 +2607,7 @@ class BaseCanvas extends Canvas {
           draggable: link.draggable === undefined ? _.get(this, 'theme.edge.draggable') : link.draggable,
           labelPosition: link.labelPosition === undefined ? _.get(this, 'theme.edge.labelPosition') : link.labelPosition,
           labelOffset: link.labelOffset === undefined ? _.get(this, 'theme.edge.labelOffset') : link.labelOffset,
-          labelUpdateInterval:  link.labelUpdateInterval === undefined ? _.get(this, 'theme.edge.labelUpdateInterval') : link.labelUpdateInterval,
+          labelUpdateInterval: link.labelUpdateInterval === undefined ? _.get(this, 'theme.edge.labelUpdateInterval') : link.labelUpdateInterval,
           options: link,
           _sourceType,
           _targetType,
@@ -2864,7 +2864,7 @@ class BaseCanvas extends Canvas {
         return false;
       } else {
         return (
-          (item.sourceNode.id === id && item.sourceEndpoint.id === pointId) || 
+          (item.sourceNode.id === id && item.sourceEndpoint.id === pointId) ||
           (item.targetNode.id === id && item.targetEndpoint.id === pointId)
         );
       }
@@ -2900,7 +2900,7 @@ class BaseCanvas extends Canvas {
     // 插入dom
     let beforeEdge = this.edges[addIndex];
     let afterEdge = this.edges[addIndex + 1];
-    
+
     if (beforeEdge) {
       let targetDom = beforeEdge.dom;
       beforeEdge.eventHandlerDom && (targetDom = beforeEdge.eventHandlerDom);
@@ -2912,7 +2912,7 @@ class BaseCanvas extends Canvas {
       $(this.svg).append(addEdgesDom);
     }
 
-    this.edges.splice(addIndex + 1, 0 , ...edges);
+    this.edges.splice(addIndex + 1, 0, ...edges);
   }
   _findEdgeIndex(edge) {
     let index = 0;
@@ -3076,15 +3076,15 @@ class BaseCanvas extends Canvas {
             }))
           }
         });
-      } else if(_.get(this.layout, 'type') === 'gridLayout') {
+      } else if (_.get(this.layout, 'type') === 'gridLayout') {
         const _opts = $.extend({
           // 布局画布总宽度
-          width:  _.get(this.layout, 'width') || 150,
+          width: _.get(this.layout, 'width') || 150,
           // 布局画布总长度
           height: _.get(this.layout, 'height') || 100,
           // 布局相对起始点
           begin: _.get(this.layout, 'begin') || [0, 0],
-          center:  _.get(this.layout, 'center') || [width / 2, height / 2],
+          center: _.get(this.layout, 'center') || [width / 2, height / 2],
           preventOverlap: _.get(this.layout, 'preventOverlap') || true,
           preventOverlapPadding: _.get(this.layout, 'preventOverlapPadding') || 10,
           condense: _.get(this.layout, 'condense') || false,
@@ -3120,23 +3120,23 @@ class BaseCanvas extends Canvas {
             }
           })
         }
-      } else if(_.get(this.layout, 'type') === 'fruchterman') {
+      } else if (_.get(this.layout, 'type') === 'fruchterman') {
         const _opts = $.extend({
-           // 布局画布总宽度
-           width,
-           // 布局画布总长度
-           height,
-            /** 停止迭代的最大迭代数 */
+          // 布局画布总宽度
+          width,
+          // 布局画布总长度
+          height,
+          /** 停止迭代的最大迭代数 */
           maxIteration: 1000,
-            /** 布局中心 */
+          /** 布局中心 */
           center: [width / 2, height / 2],
-            /** 重力大小，影响图的紧凑程度 */
+          /** 重力大小，影响图的紧凑程度 */
           gravity: 5,
           /** 速度 */
           speed: 5,
-           /** 是否产生聚类力 */
+          /** 是否产生聚类力 */
           clustering: false,
-           /** 聚类力大小 */
+          /** 聚类力大小 */
           clusterGravity: 10,
           link: {
             // 以node的什么字段为寻找id，跟d3原理一样
@@ -3163,58 +3163,58 @@ class BaseCanvas extends Canvas {
             }
           })
         }
-      } else if(_.get(this.layout, 'type') === 'radial') {
+      } else if (_.get(this.layout, 'type') === 'radial') {
         const _opts = $.extend({
           // 布局画布总宽度
           width: _.get(this.layout, 'options.width') || 500,
           // 布局画布总长度
           height: _.get(this.layout, 'options.height') || 500,
-           /** 停止迭代的最大迭代数 */
-         maxIteration:  _.get(this.layout, 'options.maxIteration')|| 1000,
-           /** 布局中心 */
-         center: _.get(this.layout, 'options.center')|| [width / 2, height / 2],
-           /** 中心点，默认为数据中第一个点 */
-         focusNode: _.get(this.layout, 'options.focusNode') || null,
-           /** 每一圈半径 */
-         unitRadius: _.get(this.layout, 'options.unitRadius') || null,
-           /** 默认边长度 */
-         linkDistance: _.get(this.layout, 'options.linkDistance') || 50,
-           /** 是否防止重叠 */
-         preventOverlap: _.get(this.layout, 'options.preventOverlap') || false,
-           /** 节点直径 */
-         nodeSize: _.get(this.layout, 'options.nodeSize') || undefined,
-           /** 节点间距，防止节点重叠时节点之间的最小距离（两节点边缘最短距离） */
-         nodeSpacing: _.get(this.layout, 'options.nodeSpacing') || undefined,
-           /** 是否必须是严格的 radial 布局，即每一层的节点严格布局在一个环上。preventOverlap 为 true 时生效 */
-         strictRadial: _.get(this.layout, 'options.strictRadial') || true,
-           /** 防止重叠步骤的最大迭代次数 */
-         maxPreventOverlapIteration: _.get(this.layout, 'options.maxPreventOverlapIteration') || 200,
-         sortBy: _.get(this.layout, 'options.sortBy') || undefined,
-         sortStrength: _.get(this.layout, 'options.sortStrength') || 10,
-         link: {
-           // 以node的什么字段为寻找id，跟d3原理一样
-           id: 'id',
-           // 线条的距离
-           distance: 100,
-           // 线条的粗细
-           strength: 1
-         }
-       }, _.get(this.layout, 'options'), true);
-       // 自动布局
-       if (_.get(this.layout, 'type') === 'radial') {
-         Layout.radial({
-           opts: _opts,
-           data: {
-             groups: data.groups,
-             nodes: data.nodes,
-             // 加工线条数据，兼容endpoint为id的属性，d3没这个概念
-             edges: data.edges.map(item => ({
-               source: item.type === 'endpoint' ? item.sourceNode : item.source,
-               target: item.type === 'endpoint' ? item.targetNode : item.target
-             }))
-           }
-         })
-       }
+          /** 停止迭代的最大迭代数 */
+          maxIteration: _.get(this.layout, 'options.maxIteration') || 1000,
+          /** 布局中心 */
+          center: _.get(this.layout, 'options.center') || [width / 2, height / 2],
+          /** 中心点，默认为数据中第一个点 */
+          focusNode: _.get(this.layout, 'options.focusNode') || null,
+          /** 每一圈半径 */
+          unitRadius: _.get(this.layout, 'options.unitRadius') || null,
+          /** 默认边长度 */
+          linkDistance: _.get(this.layout, 'options.linkDistance') || 50,
+          /** 是否防止重叠 */
+          preventOverlap: _.get(this.layout, 'options.preventOverlap') || false,
+          /** 节点直径 */
+          nodeSize: _.get(this.layout, 'options.nodeSize') || undefined,
+          /** 节点间距，防止节点重叠时节点之间的最小距离（两节点边缘最短距离） */
+          nodeSpacing: _.get(this.layout, 'options.nodeSpacing') || undefined,
+          /** 是否必须是严格的 radial 布局，即每一层的节点严格布局在一个环上。preventOverlap 为 true 时生效 */
+          strictRadial: _.get(this.layout, 'options.strictRadial') || true,
+          /** 防止重叠步骤的最大迭代次数 */
+          maxPreventOverlapIteration: _.get(this.layout, 'options.maxPreventOverlapIteration') || 200,
+          sortBy: _.get(this.layout, 'options.sortBy') || undefined,
+          sortStrength: _.get(this.layout, 'options.sortStrength') || 10,
+          link: {
+            // 以node的什么字段为寻找id，跟d3原理一样
+            id: 'id',
+            // 线条的距离
+            distance: 100,
+            // 线条的粗细
+            strength: 1
+          }
+        }, _.get(this.layout, 'options'), true);
+        // 自动布局
+        if (_.get(this.layout, 'type') === 'radial') {
+          Layout.radial({
+            opts: _opts,
+            data: {
+              groups: data.groups,
+              nodes: data.nodes,
+              // 加工线条数据，兼容endpoint为id的属性，d3没这个概念
+              edges: data.edges.map(item => ({
+                source: item.type === 'endpoint' ? item.sourceNode : item.source,
+                target: item.type === 'endpoint' ? item.targetNode : item.target
+              }))
+            }
+          })
+        }
       } else if (_.get(this.layout, 'type') === 'dagreGroupLayout') {
         Layout.dagreGroupLayout({
           //  /** layout 方向, 可选 TB, BT, LR, RL */
@@ -3997,7 +3997,7 @@ class BaseCanvas extends Canvas {
     this._guidelineService.isActive && this._guidelineService.move(position[0], position[1]);
     this._moveData = position;
     this.emit('system.canvas.move');
-    this.emit('events', {type: 'system.canvas.move'});
+    this.emit('events', { type: 'system.canvas.move' });
   }
   setGridMode(flat = true, options = this._gridObj, _isResize) {
     if (flat) {
